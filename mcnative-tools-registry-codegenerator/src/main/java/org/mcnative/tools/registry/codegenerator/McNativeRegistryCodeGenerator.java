@@ -84,13 +84,13 @@ public class McNativeRegistryCodeGenerator {
             protocolVersionBuilder.append("private static void ").append(methodName).append("() {");
 
             Document document = DocumentFileType.JSON.getReader().read(location);
-            Document loop = document;
+            Document materials = document;
             DocumentEntry first = document.getFirst();
             if(first.toDocument().contains("entries")) {
-                loop = document.getDocument("minecraft:item").getDocument("entries");
+                materials = document.getDocument("minecraft:item").getDocument("entries");
             }
 
-            for (DocumentEntry documentEntry : loop) {
+            for (DocumentEntry documentEntry : materials) {
                 String protocolVersion = documentEntry.toDocument().getString("protocol_id");
                 generateMaterialProtocolVersion(protocolVersionBuilder, constantsBuilder, "JE_"+minecraftProtocolVersion,documentEntry.getKey(),
                         protocolVersion);
@@ -98,10 +98,18 @@ public class McNativeRegistryCodeGenerator {
 
             protocolVersionBuilder.append("\n}");
 
+
+            StringBuilder soundBuilder = new StringBuilder();
+            for (DocumentEntry entries : document.getDocument("minecraft:sound_event").getDocument("entries")) {
+                soundBuilder.append("\n");
+                generateSound(soundBuilder, entries.getKey());
+            }
+
             createCodeOutputFile(protocolVersionBuilder, new File("output_protocolVersion_"+minecraftProtocolVersion+".txt"));
             if(constantsBuilder != null) {
                 createCodeOutputFile(constantsBuilder, new File("output_constants_"+minecraftProtocolVersion+".txt"));
             }
+            createCodeOutputFile(soundBuilder, new File("output_sounds_" + minecraftProtocolVersion+".txt"));
         } catch (Exception exception) {
             System.err.println("Can't read json registry from " + location.getName());
             exception.printStackTrace();
@@ -127,6 +135,11 @@ public class McNativeRegistryCodeGenerator {
             }
             constantsBuilder.append("public static final Material ").append(key).append(" = create(\"").append(key).append("\").buildAndRegister();");
         }
+    }
+
+    private static void generateSound(StringBuilder soundBuilder, String rawName) {
+        String name = rawName.replace("minecraft:", "").toUpperCase().replace(".", "_");
+        soundBuilder.append("public static void String ").append(name).append(" = \"").append(rawName).append("\";");
     }
 
     private static void showHelp() {
