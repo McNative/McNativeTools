@@ -139,7 +139,7 @@ public class McNativeRegistryCodeGenerator {
 
     private static void generateSound(StringBuilder soundBuilder, String rawName) {
         String name = rawName.replace("minecraft:", "").toUpperCase().replace(".", "_");
-        soundBuilder.append("public static void String ").append(name).append(" = \"").append(rawName).append("\";");
+        soundBuilder.append("public static String ").append(name).append(" = \"").append(rawName).append("\";");
     }
 
     private static void showHelp() {
